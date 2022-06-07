@@ -1,7 +1,11 @@
 #pragma once
 #include <QString>
 
-QString gDir = "";
-int giWaitTime = 0;
+extern QString gDir;
+extern int gWaitTime;
 
-enum eLanguage {Chiness, English};
+enum eLanguage { Chiness, English };
+extern eLanguage curLanguage;
+
+
+
