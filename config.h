@@ -1,7 +1,8 @@
 #pragma once
 #include <QString>
 
-extern QString gDir;
+
+extern QString gPath;
 extern int gWaitTime;
 
 enum eLanguage { Chiness, English };

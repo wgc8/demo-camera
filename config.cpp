@@ -2,7 +2,7 @@
 
 #include "config.h"
 
-QString gDir = "";
+QString gPath = "";
 int gWaitTime = 0;
 eLanguage curLanguage = Chiness;
 

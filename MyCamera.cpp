@@ -15,8 +15,22 @@ MyCamera::~MyCamera()
 }
 
 void MyCamera::Init() {
+
+	gPath = QCoreApplication::applicationDirPath();
+
 	this->setWindowTitle(QString::fromLocal8Bit("摄像模式"));
+
 	mCamerasList = QCameraInfo::availableCameras();
+	if (mCamerasList.empty()) {
+		QMessageBox MesBox(this);
+		QString tmpstr;
+		if (curLanguage == Chiness) tmpstr = QString::fromLocal8Bit("无可用摄像头");
+		if (curLanguage == English) tmpstr = QString::fromLocal8Bit("No camera available");
+		MesBox.setText(tmpstr);
+		MesBox.exec();
+		return;
+	}
+
 	for (int i = 0; i < mCamerasList.size(); i++) {
 		ui.cBoxCameras->addItem(mCamerasList[i].deviceName());
 	}
@@ -52,12 +66,10 @@ void MyCamera::InitConnecting(){
 	connect(ui.btnTurnRight, &QPushButton::clicked, this, &MyCamera::btnTurnRightResponsed);
 }
 
-void MyCamera::UpdateLanguage(eLanguage lan)
+void MyCamera::UpdateLanguage()
 {
-	if (curLanguage == lan)
-		return;
 	// 改变标签
-	if (lan == Chiness) {
+	if (curLanguage == Chiness) {
 		ui.btnPhotos->setText(QString::fromLocal8Bit("相册"));
 		ui.btnCapture->setText(QString::fromLocal8Bit("拍摄"));
 		ui.btnCut->setText(QString::fromLocal8Bit("剪裁"));
@@ -66,9 +78,12 @@ void MyCamera::UpdateLanguage(eLanguage lan)
 		ui.btnSettings->setText(QString::fromLocal8Bit("设置"));
 		ui.btnTurnLeft->setText(QString::fromLocal8Bit("左转"));
 		ui.btnTurnRight->setText(QString::fromLocal8Bit("右转"));
+		ui.label_2->setText(QString::fromLocal8Bit("选择摄像头"));
+
+		this->setWindowTitle(QString::fromLocal8Bit("摄像模式"));
 	}
 
-	if (lan == English) {
+	if (curLanguage == English) {
 		ui.btnPhotos->setText(QString::fromLocal8Bit("Album"));
 		ui.btnCapture->setText(QString::fromLocal8Bit("Capture"));
 		ui.btnCut->setText(QString::fromLocal8Bit("Cut"));
@@ -77,17 +92,15 @@ void MyCamera::UpdateLanguage(eLanguage lan)
 		ui.btnSettings->setText(QString::fromLocal8Bit("Settings"));
 		ui.btnTurnLeft->setText(QString::fromLocal8Bit("Turn Left"));
 		ui.btnTurnRight->setText(QString::fromLocal8Bit("Turn Right"));
-	}
+		ui.label_2->setText(QString::fromLocal8Bit("Select the Camera"));
 
-	curLanguage = lan;
-	return;
+		this->setWindowTitle(QString::fromLocal8Bit("Photo mode"));
+	}
 }
 
 void MyCamera::btnCaptureResponsed()
 {
-	QMessageBox MesBox(this);
-	MesBox.setText(QString::fromLocal8Bit("actived"));
-	MesBox.show();
+
 }
 
 void MyCamera::btnCutResponsed()
@@ -108,6 +121,9 @@ void MyCamera::btnSaveImageResponsed()
 
 void MyCamera::btnSettingsResponsed()
 {
+	DialogSettings dialog(this);
+	dialog.exec();
+	UpdateLanguage();
 }
 
 void MyCamera::btnTurnLeftResponsed()

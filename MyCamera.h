@@ -8,6 +8,7 @@
 #include <QCameraViewfinder>
 #include <QCameraImageCapture>
 #include <QCameraInfo>
+#include "DialogSettings.h"
 #include "config.h"
 #include "ui_MyCamera.h"
 
@@ -30,7 +31,7 @@ private:
 
 	void Init();
 	void InitConnecting();
-	void UpdateLanguage(eLanguage);
+	void UpdateLanguage();
 
 private slots:
 	void btnCaptureResponsed();

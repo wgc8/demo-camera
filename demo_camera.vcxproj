@@ -113,6 +113,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="config.cpp" />
+    <ClCompile Include="DialogSettings.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyCamera.cpp" />
   </ItemGroup>
@@ -120,6 +121,7 @@
     <QtMoc Include="MyCamera.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="DialogSettings.ui" />
     <QtUic Include="MyCamera.ui" />
   </ItemGroup>
   <ItemGroup>
@@ -127,6 +129,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
+    <QtMoc Include="DialogSettings.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtMultimediaWidgets</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtMultimediaWidgets</IncludePath>
+    </QtMoc>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

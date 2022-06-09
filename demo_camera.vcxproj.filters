@@ -39,14 +39,23 @@
     <ClCompile Include="config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DialogSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MyCamera.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="DialogSettings.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="MyCamera.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="DialogSettings.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
