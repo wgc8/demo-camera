@@ -2,7 +2,7 @@
 #include <QString>
 
 
-extern QString gPath;
+extern QString gDir;
 extern int gWaitTime;
 
 enum eLanguage { Chiness, English };

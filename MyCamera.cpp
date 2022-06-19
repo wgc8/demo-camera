@@ -16,7 +16,8 @@ MyCamera::~MyCamera()
 
 void MyCamera::Init() {
 
-	gPath = QCoreApplication::applicationDirPath();
+	gDir = QCoreApplication::applicationDirPath() + QString::fromLocal8Bit("/Phtots");
+	CreateFileDir();
 
 	this->setWindowTitle(QString::fromLocal8Bit("摄像模式"));
 
@@ -47,8 +48,11 @@ void MyCamera::Init() {
 
 	mCamera->setViewfinder(mCamViewFind);
 	mCamera->start();
-	ui.label->setText(QString::fromLocal8Bit("拍摄中"));
+	if (curLanguage == Chiness) ui.label->setText(QString::fromLocal8Bit("拍摄中"));
+	if (curLanguage == English) ui.label->setText(QString::fromLocal8Bit("Taking photos..."));
 
+	mTimer = new QTimer(this);
+	mTimer->setInterval(1000);	//	设置倒计时计时器间隔为1s;
 
 	//链接信号槽
 	InitConnecting();
@@ -57,6 +61,8 @@ void MyCamera::Init() {
 
 void MyCamera::InitConnecting(){
 	connect(ui.btnCapture, &QPushButton::clicked, this, &MyCamera::btnCaptureResponsed);
+	connect(mCamImgCap, &QCameraImageCapture::imageCaptured, this, &MyCamera::ImageCaptured);
+
 	connect(ui.btnCut, &QPushButton::clicked, this, &MyCamera::btnCutResponsed);
 	connect(ui.btnDelete, &QPushButton::clicked, this, &MyCamera::btnDeleteResponsed);
 	connect(ui.btnPhotos, &QPushButton::clicked, this, &MyCamera::btnPhotosResponsed);
@@ -64,6 +70,8 @@ void MyCamera::InitConnecting(){
 	connect(ui.btnSettings, &QPushButton::clicked, this, &MyCamera::btnSettingsResponsed);
 	connect(ui.btnTurnLeft, &QPushButton::clicked, this, &MyCamera::btnTurnLeftResponsed);
 	connect(ui.btnTurnRight, &QPushButton::clicked, this, &MyCamera::btnTurnRightResponsed);
+
+	connect(mTimer, &QTimer::timeout, this, &MyCamera::CountTime);
 }
 
 void MyCamera::UpdateLanguage()
@@ -81,6 +89,7 @@ void MyCamera::UpdateLanguage()
 		ui.label_2->setText(QString::fromLocal8Bit("选择摄像头"));
 
 		this->setWindowTitle(QString::fromLocal8Bit("摄像模式"));
+		ui.label->setText(QString::fromLocal8Bit("拍摄中"));
 	}
 
 	if (curLanguage == English) {
@@ -95,16 +104,44 @@ void MyCamera::UpdateLanguage()
 		ui.label_2->setText(QString::fromLocal8Bit("Select the Camera"));
 
 		this->setWindowTitle(QString::fromLocal8Bit("Photo mode"));
+		ui.label->setText(QString::fromLocal8Bit("Taking photos..."));
 	}
+}
+
+void MyCamera::CreateFileDir()
+{
+	QDir dir(gDir);
+	if (!dir.exists())
+	{
+		dir.mkdir(gDir);
+		qDebug() << "文件夹创建成功";
+	}
+}
+
+void MyCamera::ImageCaptured(int id, QImage image)
+{
+	QString savepath = QFileDialog::getSaveFileName(this, "Save Capture", gDir+"/Untitled", "Image png(*.png);;Image jpg(*.jpg);;Image bmp(*.bmp)");
+	if (!savepath.isEmpty()) {
+		image.save(savepath);
+	}
+
+	ui.btnCapture->setEnabled(true);
+	if (curLanguage == Chiness) ui.label->setText(QString::fromLocal8Bit("拍摄中"));
+	if (curLanguage == English) ui.label->setText(QString::fromLocal8Bit("Taking photos..."));
 }
 
 void MyCamera::btnCaptureResponsed()
 {
-
+	ui.btnCapture->setDisabled(true);
+	mIntRestTime = gWaitTime;
+	int time = gWaitTime;
+	QTimer::singleShot(1000 * gWaitTime, this, [this] {int id = mCamImgCap->capture(); });
+	mTimer->start();
 }
 
 void MyCamera::btnCutResponsed()
 {
+
 }
 
 void MyCamera::btnDeleteResponsed()
@@ -132,4 +169,18 @@ void MyCamera::btnTurnLeftResponsed()
 
 void MyCamera::btnTurnRightResponsed()
 {
+}
+
+void MyCamera::CountTime()
+{
+	if (mIntRestTime >= 0)
+	{
+		mIntRestTime--;
+		if (curLanguage == Chiness) ui.label->setText(QString::fromLocal8Bit("拍摄倒计时：") + QString::number(mIntRestTime) + QString::fromLocal8Bit("秒"));
+		if (curLanguage == English) ui.label->setText(QString::fromLocal8Bit("Shooting countdown: ") + QString::number(mIntRestTime) + QString::fromLocal8Bit("s"));
+	}
+	else
+	{
+		mTimer->stop();
+	}
 }

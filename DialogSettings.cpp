@@ -23,7 +23,7 @@ void DialogSettings::Init()
 	//	设置当前项
 	ui.cBoxLanguage->setCurrentIndex(curLanguage);
 	ui.sBoxWaittingTime->setValue(gWaitTime);
-	ui.lineEditPath->setText(gPath);
+	ui.lineEditPath->setText(gDir);
 
 	//	链接信号槽
 	InitConnecting();
@@ -32,6 +32,7 @@ void DialogSettings::Init()
 void DialogSettings::InitConnecting()
 {
 	connect(ui.okButton, &QPushButton::clicked, this, &DialogSettings::btnOKResponsed);
+	connect(ui.btnBrowse, &QPushButton::clicked, this, &DialogSettings::btnBrowseResponsed);
 }
 
 void DialogSettings::UpdateLanguage()
@@ -55,9 +56,15 @@ void DialogSettings::UpdateLanguage()
 	}
 }
 
+void DialogSettings::btnBrowseResponsed()
+{
+	QString dir = QFileDialog::getExistingDirectory(this);
+	ui.lineEditPath->setText(dir);
+}
+
 void DialogSettings:: btnOKResponsed() {
 	curLanguage = static_cast<eLanguage> (ui.cBoxLanguage->currentIndex());
-	gPath = ui.lineEditPath->text();
+	gDir = ui.lineEditPath->text();
 	gWaitTime = ui.sBoxWaittingTime->value();
 	this->accept();
 }

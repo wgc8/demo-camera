@@ -8,6 +8,9 @@
 #include <QCameraViewfinder>
 #include <QCameraImageCapture>
 #include <QCameraInfo>
+#include <QDir>
+#include <QTimer>
+#include <QFileDialog> 
 #include "DialogSettings.h"
 #include "config.h"
 #include "ui_MyCamera.h"
@@ -25,13 +28,16 @@ private:
 	QCamera *mCamera;
 	QCameraViewfinder * mCamViewFind;
 	QCameraImageCapture * mCamImgCap;
-	QLabel *mDisplayLabel;
-
 	QList<QCameraInfo> mCamerasList;
+
+	QTimer *mTimer;
+	int mIntRestTime;
 
 	void Init();
 	void InitConnecting();
 	void UpdateLanguage();
+	void CreateFileDir();
+	void ImageCaptured(int, QImage);
 
 private slots:
 	void btnCaptureResponsed();
@@ -42,4 +48,6 @@ private slots:
 	void btnSettingsResponsed();
 	void btnTurnLeftResponsed();
 	void btnTurnRightResponsed();
+
+	void CountTime();
 };

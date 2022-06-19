@@ -2,6 +2,7 @@
 
 #include <QtWidgets/QWidget>
 #include <QString>
+#include <QFileDialog>
 #include "config.h"
 #include "ui_DialogSettings.h"
 
@@ -23,4 +24,5 @@ private:
 
 private slots:
 	void btnOKResponsed();
+	void btnBrowseResponsed();
 };
