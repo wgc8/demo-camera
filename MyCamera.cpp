@@ -19,7 +19,9 @@ void MyCamera::Init() {
 	gDir = QCoreApplication::applicationDirPath() + QString::fromLocal8Bit("/Phtots");
 	CreateFileDir();
 
-	this->setWindowTitle(QString::fromLocal8Bit("摄像模式"));
+	ui.widgetOpeartions->setVisible(false);
+
+	this->setWindowTitle(QString::fromLocal8Bit("MyCamera"));
 
 	mCamerasList = QCameraInfo::availableCameras();
 	if (mCamerasList.empty()) {
@@ -78,7 +80,9 @@ void MyCamera::UpdateLanguage()
 {
 	// 改变标签
 	if (curLanguage == Chiness) {
-		ui.btnPhotos->setText(QString::fromLocal8Bit("相册"));
+
+		if (curMode == Album) ui.btnPhotos->setText(QString::fromLocal8Bit("拍照"));
+		else ui.btnPhotos->setText(QString::fromLocal8Bit("相冊"));
 		ui.btnCapture->setText(QString::fromLocal8Bit("拍摄"));
 		ui.btnCut->setText(QString::fromLocal8Bit("剪裁"));
 		ui.btnSaveImage->setText(QString::fromLocal8Bit("保存"));
@@ -88,12 +92,14 @@ void MyCamera::UpdateLanguage()
 		ui.btnTurnRight->setText(QString::fromLocal8Bit("右转"));
 		ui.label_2->setText(QString::fromLocal8Bit("选择摄像头"));
 
-		this->setWindowTitle(QString::fromLocal8Bit("摄像模式"));
-		ui.label->setText(QString::fromLocal8Bit("拍摄中"));
+		if (curMode == Taking_photos) ui.label->setText(QString::fromLocal8Bit("拍摄中"));
+		else ui.label->setText(QString::fromLocal8Bit("查看相冊中"));
 	}
 
 	if (curLanguage == English) {
-		ui.btnPhotos->setText(QString::fromLocal8Bit("Album"));
+
+		if (curMode == Album) ui.btnPhotos->setText(QString::fromLocal8Bit("Taking Photos"));
+		else ui.btnPhotos->setText(QString::fromLocal8Bit("Album"));
 		ui.btnCapture->setText(QString::fromLocal8Bit("Capture"));
 		ui.btnCut->setText(QString::fromLocal8Bit("Cut"));
 		ui.btnSaveImage->setText(QString::fromLocal8Bit("Save"));
@@ -103,8 +109,8 @@ void MyCamera::UpdateLanguage()
 		ui.btnTurnRight->setText(QString::fromLocal8Bit("Turn Right"));
 		ui.label_2->setText(QString::fromLocal8Bit("Select the Camera"));
 
-		this->setWindowTitle(QString::fromLocal8Bit("Photo mode"));
-		ui.label->setText(QString::fromLocal8Bit("Taking photos..."));
+		if (curMode == Taking_photos) ui.label->setText(QString::fromLocal8Bit("Taking photos..."));
+		else ui.label->setText(QString::fromLocal8Bit("Browsing album"));
 	}
 }
 
@@ -126,6 +132,7 @@ void MyCamera::ImageCaptured(int id, QImage image)
 	}
 
 	ui.btnCapture->setEnabled(true);
+	ui.btnPhotos->setEnabled(true);
 	if (curLanguage == Chiness) ui.label->setText(QString::fromLocal8Bit("拍摄中"));
 	if (curLanguage == English) ui.label->setText(QString::fromLocal8Bit("Taking photos..."));
 }
@@ -133,6 +140,7 @@ void MyCamera::ImageCaptured(int id, QImage image)
 void MyCamera::btnCaptureResponsed()
 {
 	ui.btnCapture->setDisabled(true);
+	ui.btnPhotos->setDisabled(true);
 	mIntRestTime = gWaitTime;
 	int time = gWaitTime;
 	QTimer::singleShot(1000 * gWaitTime, this, [this] {int id = mCamImgCap->capture(); });
@@ -150,6 +158,23 @@ void MyCamera::btnDeleteResponsed()
 
 void MyCamera::btnPhotosResponsed()
 {
+	if (curMode == Album) {	//	当前为相册模式
+		ui.widgetOpeartions->setVisible(false);
+		ui.widget_4->setVisible(true);
+		if (curLanguage == Chiness) ui.btnPhotos->setText(QString::fromLocal8Bit("相册"));
+		if (curLanguage == English) ui.btnPhotos->setText(QString::fromLocal8Bit("Album"));
+
+
+		curMode = Taking_photos;
+	}
+	else {									//	当前为拍照模式
+		ui.widgetOpeartions->setVisible(true);
+		ui.widget_4->setVisible(false);
+		if (curLanguage == Chiness) ui.btnPhotos->setText(QString::fromLocal8Bit("拍照"));
+		if (curLanguage == English) ui.btnPhotos->setText(QString::fromLocal8Bit("Taking Photos"));
+
+		curMode = Album;
+	}
 }
 
 void MyCamera::btnSaveImageResponsed()
