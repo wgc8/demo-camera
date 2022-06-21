@@ -29,6 +29,7 @@ private:
 	QCameraViewfinder * mCamViewFind;
 	QCameraImageCapture * mCamImgCap;
 	QList<QCameraInfo> mCamerasList;
+	QLabel *mDisplayLabel;
 
 	QTimer *mTimer;
 	int mIntRestTime;

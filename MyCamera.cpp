@@ -23,6 +23,8 @@ void MyCamera::Init() {
 
 	this->setWindowTitle(QString::fromLocal8Bit("MyCamera"));
 
+	mDisplayLabel = new QLabel(this);
+	mDisplayLabel->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding));	//很关键
 	mCamerasList = QCameraInfo::availableCameras();
 	if (mCamerasList.empty()) {
 		QMessageBox MesBox(this);
@@ -44,7 +46,8 @@ void MyCamera::Init() {
 	mCamImgCap = new QCameraImageCapture(mCamera);
 
 	mCamImgCap->setCaptureDestination(QCameraImageCapture::CaptureToFile);
-	ui.DisplayLayout->addWidget(mCamViewFind);
+	ui.DisplayLayout->addWidget(mCamViewFind);	//加入取景框
+	ui.DisplayLayout->addWidget(mDisplayLabel);	//加入照片渲染窗口
 
 	mCamera->setCaptureMode(QCamera::CaptureStillImage);
 
@@ -158,20 +161,42 @@ void MyCamera::btnDeleteResponsed()
 
 void MyCamera::btnPhotosResponsed()
 {
-	if (curMode == Album) {	//	当前为相册模式
+	if (curMode == Album) {	//	当前为相册模式，要切換到拍照模式
 		ui.widgetOpeartions->setVisible(false);
 		ui.widget_4->setVisible(true);
-		if (curLanguage == Chiness) ui.btnPhotos->setText(QString::fromLocal8Bit("相册"));
-		if (curLanguage == English) ui.btnPhotos->setText(QString::fromLocal8Bit("Album"));
 
+		if (curLanguage == Chiness) {
+			ui.btnPhotos->setText(QString::fromLocal8Bit("相册"));
+			ui.label->setText(QString::fromLocal8Bit("拍照中"));
+		}
+		if (curLanguage == English) {
+			ui.btnPhotos->setText(QString::fromLocal8Bit("Album"));
+			ui.label->setText(QString::fromLocal8Bit("Taking photos..."));
+		}
+		mCamera->start();
+		mDisplayLabel->hide();
+		mCamViewFind->show();
 
 		curMode = Taking_photos;
 	}
-	else {									//	当前为拍照模式
+	else {					//	当前为拍照模式，要切換到相冊模式
 		ui.widgetOpeartions->setVisible(true);
 		ui.widget_4->setVisible(false);
-		if (curLanguage == Chiness) ui.btnPhotos->setText(QString::fromLocal8Bit("拍照"));
-		if (curLanguage == English) ui.btnPhotos->setText(QString::fromLocal8Bit("Taking Photos"));
+
+		if (curLanguage == Chiness) {
+			ui.btnPhotos->setText(QString::fromLocal8Bit("拍照"));
+			ui.label->setText(QString::fromLocal8Bit("浏览相册中"));
+		}
+		if (curLanguage == English) {
+			ui.btnPhotos->setText(QString::fromLocal8Bit("Taking Photos"));
+			ui.label->setText(QString::fromLocal8Bit("Browsing album"));
+		}
+		mCamera->stop();
+
+		mDisplayLabel->show();
+		mCamViewFind->hide();
+
+		mDisplayLabel->setStyleSheet("QLabel{background-color:rgb(255, 255, 255);}");//设置样式表，底色为白色
 
 		curMode = Album;
 	}
