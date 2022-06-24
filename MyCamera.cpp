@@ -11,7 +11,8 @@ MyCamera::MyCamera(QWidget *parent)
 MyCamera::~MyCamera()
 {
 	delete mCamera;
-	delete mCamImgCap, mCamViewFind;
+	delete mCamImgCap, mCamViewFind, mDisplayLabel;
+	delete mImageNamesList;
 }
 
 void MyCamera::Init() {
@@ -24,6 +25,7 @@ void MyCamera::Init() {
 	this->setWindowTitle(QString::fromLocal8Bit("MyCamera"));
 
 	mDisplayLabel = new QLabel(this);
+	mImageNamesList = new QStringList();
 	mDisplayLabel->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding));	//很关键
 	mCamerasList = QCameraInfo::availableCameras();
 	if (mCamerasList.empty()) {
@@ -60,14 +62,16 @@ void MyCamera::Init() {
 	mTimer->setInterval(1000);	//	设置倒计时计时器间隔为1s;
 
 	//链接信号槽
-	InitConnecting();
+	InitConnections();
 
 }
 
-void MyCamera::InitConnecting(){
+void MyCamera::InitConnections(){
 	connect(ui.btnCapture, &QPushButton::clicked, this, &MyCamera::btnCaptureResponsed);
 	connect(mCamImgCap, &QCameraImageCapture::imageCaptured, this, &MyCamera::ImageCaptured);
 
+	connect(ui.btnPrevious, &QPushButton::clicked, this, &MyCamera::btnPreviousResponsed);
+	connect(ui.btnNext, &QPushButton::clicked, this, &MyCamera::btnNextResponsed);
 	connect(ui.btnCut, &QPushButton::clicked, this, &MyCamera::btnCutResponsed);
 	connect(ui.btnDelete, &QPushButton::clicked, this, &MyCamera::btnDeleteResponsed);
 	connect(ui.btnPhotos, &QPushButton::clicked, this, &MyCamera::btnPhotosResponsed);
@@ -87,6 +91,8 @@ void MyCamera::UpdateLanguage()
 		if (curMode == Album) ui.btnPhotos->setText(QString::fromLocal8Bit("拍照"));
 		else ui.btnPhotos->setText(QString::fromLocal8Bit("相冊"));
 		ui.btnCapture->setText(QString::fromLocal8Bit("拍摄"));
+		ui.btnPrevious->setText(QString::fromLocal8Bit("上一张"));
+		ui.btnNext->setText(QString::fromLocal8Bit("下一张"));
 		ui.btnCut->setText(QString::fromLocal8Bit("剪裁"));
 		ui.btnSaveImage->setText(QString::fromLocal8Bit("保存"));
 		ui.btnDelete->setText(QString::fromLocal8Bit("删除"));
@@ -103,6 +109,8 @@ void MyCamera::UpdateLanguage()
 
 		if (curMode == Album) ui.btnPhotos->setText(QString::fromLocal8Bit("Taking Photos"));
 		else ui.btnPhotos->setText(QString::fromLocal8Bit("Album"));
+		ui.btnPrevious->setText(QString::fromLocal8Bit("Previous"));
+		ui.btnNext->setText(QString::fromLocal8Bit("Next"));
 		ui.btnCapture->setText(QString::fromLocal8Bit("Capture"));
 		ui.btnCut->setText(QString::fromLocal8Bit("Cut"));
 		ui.btnSaveImage->setText(QString::fromLocal8Bit("Save"));
@@ -140,6 +148,30 @@ void MyCamera::ImageCaptured(int id, QImage image)
 	if (curLanguage == English) ui.label->setText(QString::fromLocal8Bit("Taking photos..."));
 }
 
+void MyCamera::GetCurPathImagesList()
+{
+	mImageNamesList->clear();
+	QDir dir(gDir);//当前程序工作路径 作为目录路径 
+	if (!dir.exists())
+	{
+		qInfo() << "path is non-existent...";
+		return;
+	}
+	dir.setFilter(QDir::Files | QDir::NoSymLinks);
+	QStringList filters;
+	filters << "*.bmp" << "*.jpg" << "*.png";
+	dir.setNameFilters(filters);
+	*mImageNamesList = dir.entryList();
+}
+
+void MyCamera::RenderImage()
+{
+	QImage image = QImage();
+	QString imageName = gDir + "/" + mImageNamesList->at(mIntCurImageIdx);
+	image.load(imageName);
+	mDisplayLabel->setPixmap(QPixmap::fromImage(image));
+}
+
 void MyCamera::btnCaptureResponsed()
 {
 	ui.btnCapture->setDisabled(true);
@@ -162,8 +194,10 @@ void MyCamera::btnDeleteResponsed()
 void MyCamera::btnPhotosResponsed()
 {
 	if (curMode == Album) {	//	当前为相册模式，要切換到拍照模式
+		curMode = Taking_photos;
 		ui.widgetOpeartions->setVisible(false);
 		ui.widget_4->setVisible(true);
+		ui.btnCapture->show();
 
 		if (curLanguage == Chiness) {
 			ui.btnPhotos->setText(QString::fromLocal8Bit("相册"));
@@ -177,11 +211,12 @@ void MyCamera::btnPhotosResponsed()
 		mDisplayLabel->hide();
 		mCamViewFind->show();
 
-		curMode = Taking_photos;
 	}
 	else {					//	当前为拍照模式，要切換到相冊模式
+		curMode = Album;
 		ui.widgetOpeartions->setVisible(true);
 		ui.widget_4->setVisible(false);
+		ui.btnCapture->hide();
 
 		if (curLanguage == Chiness) {
 			ui.btnPhotos->setText(QString::fromLocal8Bit("拍照"));
@@ -196,9 +231,17 @@ void MyCamera::btnPhotosResponsed()
 		mDisplayLabel->show();
 		mCamViewFind->hide();
 
-		mDisplayLabel->setStyleSheet("QLabel{background-color:rgb(255, 255, 255);}");//设置样式表，底色为白色
+		//mDisplayLabel->setStyleSheet("QLabel{background-color:rgb(255, 255, 255);}");//设置样式表，底色为白色
 
-		curMode = Album;
+		GetCurPathImagesList();
+		mIntCurImageIdx = 0;
+		if (mImageNamesList->empty()) {
+			QMessageBox::warning(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("当前路径无照片"));
+			return;
+		}
+
+		RenderImage();	//渲染图片
+
 	}
 }
 
@@ -219,6 +262,28 @@ void MyCamera::btnTurnLeftResponsed()
 
 void MyCamera::btnTurnRightResponsed()
 {
+}
+
+void MyCamera::btnPreviousResponsed()
+{
+	if (mIntCurImageIdx <= 0) {
+		QMessageBox::warning(this, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("已是第一张照片"));
+		return;
+	}
+
+	mIntCurImageIdx--;
+	RenderImage();
+}
+
+void MyCamera::btnNextResponsed()
+{
+	if (mIntCurImageIdx >= mImageNamesList->size() - 1) {
+		QMessageBox::warning(this, QString::fromLocal8Bit("警告"), QString::fromLocal8Bit("已是最后一张照片"));
+		return;
+	}
+
+	mIntCurImageIdx++;
+	RenderImage();
 }
 
 void MyCamera::CountTime()

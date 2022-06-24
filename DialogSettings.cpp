@@ -26,10 +26,10 @@ void DialogSettings::Init()
 	ui.lineEditPath->setText(gDir);
 
 	//	Á´½ÓÐÅºÅ²Û
-	InitConnecting();
+	InitConnections();
 }
 
-void DialogSettings::InitConnecting()
+void DialogSettings::InitConnections()
 {
 	connect(ui.okButton, &QPushButton::clicked, this, &DialogSettings::btnOKResponsed);
 	connect(ui.btnBrowse, &QPushButton::clicked, this, &DialogSettings::btnBrowseResponsed);

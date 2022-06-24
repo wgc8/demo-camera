@@ -19,7 +19,7 @@ private:
 	
 
 	void Init();
-	void InitConnecting();
+	void InitConnections();
 	void UpdateLanguage();
 
 private slots:

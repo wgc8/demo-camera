@@ -25,20 +25,25 @@ public:
 
 private:
 	Ui::MyCameraClass ui;
+	int mIntCurImageIdx;
+	int mIntRestTime;
 	QCamera *mCamera;
 	QCameraViewfinder * mCamViewFind;
 	QCameraImageCapture * mCamImgCap;
 	QList<QCameraInfo> mCamerasList;
+	QStringList *mImageNamesList;
 	QLabel *mDisplayLabel;
 
 	QTimer *mTimer;
-	int mIntRestTime;
+
 
 	void Init();
-	void InitConnecting();
+	void InitConnections();
 	void UpdateLanguage();
 	void CreateFileDir();
 	void ImageCaptured(int, QImage);
+	void GetCurPathImagesList();
+	void RenderImage();
 
 private slots:
 	void btnCaptureResponsed();
@@ -49,6 +54,8 @@ private slots:
 	void btnSettingsResponsed();
 	void btnTurnLeftResponsed();
 	void btnTurnRightResponsed();
+	void btnPreviousResponsed();
+	void btnNextResponsed();
 
 	void CountTime();
 };
