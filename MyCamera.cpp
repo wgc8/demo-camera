@@ -166,10 +166,11 @@ void MyCamera::GetCurPathImagesList()
 
 void MyCamera::RenderImage()
 {
-	QImage image = QImage();
 	QString imageName = gDir + "/" + mImageNamesList->at(mIntCurImageIdx);
-	image.load(imageName);
-	mDisplayLabel->setPixmap(QPixmap::fromImage(image));
+	QPixmap pixmap = QPixmap(imageName);
+	pixmap.scaled(mDisplayLabel->size(), Qt::KeepAspectRatio);
+	mDisplayLabel->setScaledContents(true);
+	mDisplayLabel->setPixmap(pixmap);
 }
 
 void MyCamera::btnCaptureResponsed()
