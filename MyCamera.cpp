@@ -154,7 +154,6 @@ void MyCamera::GetCurPathImagesList()
 	QDir dir(gDir);//当前程序工作路径 作为目录路径 
 	if (!dir.exists())
 	{
-		qInfo() << "path is non-existent...";
 		return;
 	}
 	dir.setFilter(QDir::Files | QDir::NoSymLinks);
@@ -166,11 +165,15 @@ void MyCamera::GetCurPathImagesList()
 
 void MyCamera::RenderImage()
 {
+	//QImage Image;
 	QString imageName = gDir + "/" + mImageNamesList->at(mIntCurImageIdx);
+	//Image.load(imageName);
 	QPixmap pixmap = QPixmap(imageName);
-	pixmap.scaled(mDisplayLabel->size(), Qt::KeepAspectRatio);
-	mDisplayLabel->setScaledContents(true);
+	//QPixmap pixmap = QPixmap::fromImage(Image);
+	//QPixmap tmp = pixmap.scaled(mDisplayLabel->size(), Qt::KeepAspectRatio);
+	//mDisplayLabel->setScaledContents(true);
 	mDisplayLabel->setPixmap(pixmap);
+
 }
 
 void MyCamera::btnCaptureResponsed()
@@ -190,6 +193,16 @@ void MyCamera::btnCutResponsed()
 
 void MyCamera::btnDeleteResponsed()
 {
+	QString imageName = gDir + "/" + mImageNamesList->at(mIntCurImageIdx);
+	if (!QDir().exists(imageName))
+		return;
+	QFileInfo fileInfo(imageName);
+
+	if (fileInfo.isFile())
+		QFile::remove(imageName);
+	GetCurPathImagesList();
+	mIntCurImageIdx = mIntCurImageIdx % mImageNamesList->size();
+	RenderImage();
 }
 
 void MyCamera::btnPhotosResponsed()
@@ -232,7 +245,7 @@ void MyCamera::btnPhotosResponsed()
 		mDisplayLabel->show();
 		mCamViewFind->hide();
 
-		//mDisplayLabel->setStyleSheet("QLabel{background-color:rgb(255, 255, 255);}");//设置样式表，底色为白色
+		mDisplayLabel->setStyleSheet("QLabel{background-color:rgb(255, 255, 255);}");//设置样式表，底色为白色
 
 		GetCurPathImagesList();
 		mIntCurImageIdx = 0;
@@ -242,12 +255,19 @@ void MyCamera::btnPhotosResponsed()
 		}
 
 		RenderImage();	//渲染图片
-
 	}
 }
 
 void MyCamera::btnSaveImageResponsed()
 {
+	QString savepath = QFileDialog::getSaveFileName(this, "Save Capture", gDir + "/Untitled", "Image png(*.png);;Image jpg(*.jpg);;Image bmp(*.bmp)");
+	const QPixmap *current_img = mDisplayLabel->pixmap();
+	if (!savepath.isEmpty()) {
+		current_img->save(savepath);
+	}
+	GetCurPathImagesList();
+	//mIntCurImageIdx = mIntCurImageIdx % mImageNamesList->size();
+	RenderImage();
 }
 
 void MyCamera::btnSettingsResponsed()
@@ -259,10 +279,20 @@ void MyCamera::btnSettingsResponsed()
 
 void MyCamera::btnTurnLeftResponsed()
 {
+	QMatrix matrix;
+	matrix.rotate(-90);
+	const QPixmap *curPixmap = mDisplayLabel->pixmap();
+
+	mDisplayLabel->setPixmap(curPixmap->transformed(matrix, Qt::SmoothTransformation));
 }
 
 void MyCamera::btnTurnRightResponsed()
 {
+	QMatrix matrix;
+	matrix.rotate(90);
+	const QPixmap *curPixmap = mDisplayLabel->pixmap();
+
+	mDisplayLabel->setPixmap(curPixmap->transformed(matrix, Qt::SmoothTransformation));
 }
 
 void MyCamera::btnPreviousResponsed()
