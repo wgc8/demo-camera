@@ -24,9 +24,10 @@ void MyCamera::Init() {
 
 	this->setWindowTitle(QString::fromLocal8Bit("MyCamera"));
 
-	mDisplayLabel = new QLabel(this);
+	mDisplayLabel = new MyLabel(this);
 	mImageNamesList = new QStringList();
-	mDisplayLabel->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding));	//很关键
+	mDisplayLabel->setAlignment(Qt::AlignCenter);
+	mDisplayLabel->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));	//很关键
 	mCamerasList = QCameraInfo::availableCameras();
 	if (mCamerasList.empty()) {
 		QMessageBox MesBox(this);
@@ -158,7 +159,7 @@ void MyCamera::GetCurPathImagesList()
 	}
 	dir.setFilter(QDir::Files | QDir::NoSymLinks);
 	QStringList filters;
-	filters << "*.bmp" << "*.jpg" << "*.png";
+	filters << "*.bmp" << "*.jpg" << "*.png" << "*.jpeg";
 	dir.setNameFilters(filters);
 	*mImageNamesList = dir.entryList();
 }
@@ -170,9 +171,10 @@ void MyCamera::RenderImage()
 	//Image.load(imageName);
 	QPixmap pixmap = QPixmap(imageName);
 	//QPixmap pixmap = QPixmap::fromImage(Image);
-	//QPixmap tmp = pixmap.scaled(mDisplayLabel->size(), Qt::KeepAspectRatio);
+	qDebug() << mDisplayLabel->size();
+	QPixmap tmp = pixmap.scaled(mDisplayLabel->size(), Qt::KeepAspectRatio);
 	//mDisplayLabel->setScaledContents(true);
-	mDisplayLabel->setPixmap(pixmap);
+	mDisplayLabel->setPixmap(tmp);
 
 }
 
@@ -228,6 +230,10 @@ void MyCamera::btnPhotosResponsed()
 	}
 	else {					//	当前为拍照模式，要切換到相冊模式
 		curMode = Album;
+		mCamViewFind->hide();
+		mCamera->stop();
+		mDisplayLabel->show();
+
 		ui.widgetOpeartions->setVisible(true);
 		ui.widget_4->setVisible(false);
 		ui.btnCapture->hide();
@@ -240,10 +246,7 @@ void MyCamera::btnPhotosResponsed()
 			ui.btnPhotos->setText(QString::fromLocal8Bit("Taking Photos"));
 			ui.label->setText(QString::fromLocal8Bit("Browsing album"));
 		}
-		mCamera->stop();
 
-		mDisplayLabel->show();
-		mCamViewFind->hide();
 
 		mDisplayLabel->setStyleSheet("QLabel{background-color:rgb(255, 255, 255);}");//设置样式表，底色为白色
 
@@ -253,14 +256,16 @@ void MyCamera::btnPhotosResponsed()
 			QMessageBox::warning(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("当前路径无照片"));
 			return;
 		}
+		qDebug() << "MyCamera::btnPhotosResponsed():" << mDisplayLabel->size();
 
 		RenderImage();	//渲染图片
+
 	}
 }
 
 void MyCamera::btnSaveImageResponsed()
 {
-	QString savepath = QFileDialog::getSaveFileName(this, "Save Capture", gDir + "/Untitled", "Image png(*.png);;Image jpg(*.jpg);;Image bmp(*.bmp)");
+	QString savepath = QFileDialog::getSaveFileName(this, "Save Capture", gDir + "/Untitled", "Image png(*.png);;Image jpg(*.jpg);;Image bmp(*.bmp);;Image jpeg(*.jpeg)");
 	const QPixmap *current_img = mDisplayLabel->pixmap();
 	if (!savepath.isEmpty()) {
 		current_img->save(savepath);

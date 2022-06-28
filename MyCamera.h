@@ -11,6 +11,7 @@
 #include <QDir>
 #include <QTimer>
 #include <QFileDialog> 
+#include "MyLabel.h"
 #include "DialogSettings.h"
 #include "config.h"
 #include "ui_MyCamera.h"
@@ -32,7 +33,7 @@ private:
 	QCameraImageCapture * mCamImgCap;
 	QList<QCameraInfo> mCamerasList;
 	QStringList *mImageNamesList;
-	QLabel *mDisplayLabel;
+	MyLabel *mDisplayLabel;
 
 	QTimer *mTimer;
 
