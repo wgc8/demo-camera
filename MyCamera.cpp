@@ -166,16 +166,14 @@ void MyCamera::GetCurPathImagesList()
 
 void MyCamera::RenderImage()
 {
-	//QImage Image;
 	QString imageName = gDir + "/" + mImageNamesList->at(mIntCurImageIdx);
-	//Image.load(imageName);
-	QPixmap pixmap = QPixmap(imageName);
-	//QPixmap pixmap = QPixmap::fromImage(Image);
-	qDebug() << mDisplayLabel->size();
-	QPixmap tmp = pixmap.scaled(mDisplayLabel->size(), Qt::KeepAspectRatio);
-	//mDisplayLabel->setScaledContents(true);
-	mDisplayLabel->setPixmap(tmp);
-
+	//QPixmap pixmap = QPixmap(imageName);
+	//QPixmap tmp = pixmap.scaled(mDisplayLabel->size(), Qt::KeepAspectRatio);
+	////mDisplayLabel->setScaledContents(true);
+	//mDisplayLabel->setPixmap(tmp);
+	mDisplayLabel->setPixmap(imageName);
+	mDisplayLabel->Reset();
+	mDisplayLabel->update();
 }
 
 void MyCamera::btnCaptureResponsed()
@@ -259,7 +257,6 @@ void MyCamera::btnPhotosResponsed()
 		qDebug() << "MyCamera::btnPhotosResponsed():" << mDisplayLabel->size();
 
 		RenderImage();	//äÖÈ¾Í¼Æ¬
-
 	}
 }
 
@@ -286,18 +283,14 @@ void MyCamera::btnTurnLeftResponsed()
 {
 	QMatrix matrix;
 	matrix.rotate(-90);
-	const QPixmap *curPixmap = mDisplayLabel->pixmap();
-
-	mDisplayLabel->setPixmap(curPixmap->transformed(matrix, Qt::SmoothTransformation));
+	mDisplayLabel->TurnImage(matrix);
 }
 
 void MyCamera::btnTurnRightResponsed()
 {
 	QMatrix matrix;
 	matrix.rotate(90);
-	const QPixmap *curPixmap = mDisplayLabel->pixmap();
-
-	mDisplayLabel->setPixmap(curPixmap->transformed(matrix, Qt::SmoothTransformation));
+	mDisplayLabel->TurnImage(matrix);
 }
 
 void MyCamera::btnPreviousResponsed()
