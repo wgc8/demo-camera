@@ -5,6 +5,7 @@
 #include <QWheelEvent>
 #include <QPainter>
 #include <QDebug>
+#include "PointButton.h"
 
 class MyLabel :public QLabel
 {
@@ -13,7 +14,9 @@ public:
 	~MyLabel();
 	void TurnImage(QMatrix& matrix, Qt::TransformationMode mode = Qt::SmoothTransformation);
 	void Reset();
-	void loadImage(QString& imagename) { mImageName = imagename; };
+	void SetCornerBtnsVisible(bool);
+	bool isCornerBtnsVisible();
+	void ChangeCutViewfinderSize(int x, int y);
 
 protected:
 	virtual void paintEvent(QPaintEvent *) override;
@@ -24,15 +27,24 @@ protected:
 	virtual void resizeEvent(QResizeEvent *event) override;
 
 private:
+	inline void DrawImage();
+	inline void DrawCutViewfinder();
+	void SetCornerBtns(int x1, int y1, int x2, int y2);
+
+private:
+	bool misMousePress;			// 鼠标是否按下
 	double mScaleValue;			// 图片缩放倍数
 	QPointF mDrawPoint;			// 绘图起点
 	QPointF mMousePoint;			// 鼠标当前位置点
 	QRect mRectPixmap;			// 被绘图片的矩形范围
+	QPen *mPen;
 	QPixmap *mScaledPixmap;		// 调整后的图片Pixmap
-	QString mImageName;			// 被绘图片的文件名
-	bool misMousePress;			// 鼠标是否按下
+	PointButton *mTopLeftBtn;
+	PointButton *mTopRightBtn;
+	PointButton *mBottomLeftBtn;
+	PointButton *mBottomRightBtn;// 裁剪框四个顶角按钮
 
-	const double ZOOM_VALUE = 1.1;
+	const double ZOOM_VALUE = 1.1;		// 缩放系数
 	const double SCALE_MAX_VALUE = 5.0;//最大放大到原来的10倍
 	const double SCALE_MIN_VALUE = 0.5;//最小缩小到原来的0.5倍
 

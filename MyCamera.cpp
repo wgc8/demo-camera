@@ -188,7 +188,9 @@ void MyCamera::btnCaptureResponsed()
 
 void MyCamera::btnCutResponsed()
 {
-
+	if (mDisplayLabel->isCornerBtnsVisible()) mDisplayLabel->SetCornerBtnsVisible(false);
+	else mDisplayLabel->SetCornerBtnsVisible(true);
+	mDisplayLabel->update();
 }
 
 void MyCamera::btnDeleteResponsed()

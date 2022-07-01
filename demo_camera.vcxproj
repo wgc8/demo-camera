@@ -117,6 +117,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MyCamera.cpp" />
     <ClCompile Include="MyLabel.cpp" />
+    <ClCompile Include="PointButton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MyCamera.h" />
@@ -131,6 +132,7 @@
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="MyLabel.h" />
+    <ClInclude Include="PointButton.h" />
     <QtMoc Include="DialogSettings.h">
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtMultimediaWidgets</IncludePath>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets;$(QTDIR)\include\QtMultimedia;$(QTDIR)\include\QtMultimediaWidgets</IncludePath>
