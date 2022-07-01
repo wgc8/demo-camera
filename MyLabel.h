@@ -22,13 +22,13 @@ protected:
 	virtual void mouseReleaseEvent(QMouseEvent *ev) override;
 	virtual void wheelEvent(QWheelEvent *event) override;
 	virtual void resizeEvent(QResizeEvent *event) override;
-	void changeWheelValue(QPoint event, int value);
+
 private:
 	double mScaleValue;			// 图片缩放倍数
 	QPointF mDrawPoint;			// 绘图起点
 	QPointF mMousePoint;			// 鼠标当前位置点
 	QRect mRectPixmap;			// 被绘图片的矩形范围
-	QPixmap mScaledPixmap;		// 调整后的图片Pixmap
+	QPixmap *mScaledPixmap;		// 调整后的图片Pixmap
 	QString mImageName;			// 被绘图片的文件名
 	bool misMousePress;			// 鼠标是否按下
 

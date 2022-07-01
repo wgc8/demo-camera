@@ -8,7 +8,7 @@ MyLabel::MyLabel(QWidget * parent)
 	, mRectPixmap(0, 0, 0, 0)
 	, misMousePress(0)
 	, mImageName("")
-	, mScaledPixmap()
+	, mScaledPixmap(new QPixmap())
 {
 }
 
@@ -26,11 +26,11 @@ void MyLabel::TurnImage(QMatrix & matrix, Qt::TransformationMode mode)
 void MyLabel::Reset()
 {
 	if (this->pixmap() == nullptr) return;
-	mScaledPixmap = this->pixmap()->scaled(this->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation); // 按比例缩放
-	qDebug() << mScaledPixmap.size();
+	*mScaledPixmap = this->pixmap()->scaled(this->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation); // 按比例缩放
+	qDebug() << mScaledPixmap->size();
 	mScaleValue = 1.0;
-	double width = mScaledPixmap.width();
-	double height = mScaledPixmap.height();
+	double width = mScaledPixmap->width();
+	double height = mScaledPixmap->height();
 	mDrawPoint.setX((this->width() - width) / 2);
 	mDrawPoint.setY((this->height() - height) / 2);
 }
@@ -39,14 +39,14 @@ void MyLabel::paintEvent(QPaintEvent *)
 {
 	if (this->pixmap() == nullptr) return;
 	QPainter painter(this);
-	double width = mScaledPixmap.width() * mScaleValue;
-	double height = mScaledPixmap.height() * mScaleValue;
+	double width = mScaledPixmap->width() * mScaleValue;
+	double height = mScaledPixmap->height() * mScaleValue;
 	//mScaledPixmap = this->pixmap()->scaled(this->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation); // 按比例缩放
 	//mDrawPoint.setX((this->width() - width) / 2);
 	//mDrawPoint.setY((this->height() - height) / 2);
 	mRectPixmap = QRect(mDrawPoint.x(), mDrawPoint.y(), width, height);  // 图片区域
 	//qDebug() << this->pixmap()->size();
-	painter.drawPixmap(mRectPixmap, mScaledPixmap);
+	painter.drawPixmap(mRectPixmap, *mScaledPixmap);
 }
 
 void MyLabel::mouseMoveEvent(QMouseEvent * event)
@@ -64,9 +64,9 @@ void MyLabel::mouseMoveEvent(QMouseEvent * event)
 
 void MyLabel::mousePressEvent(QMouseEvent * event)
 {
-	setCursor(Qt::ClosedHandCursor);
-	if (event->button() == Qt::LeftButton)
+	if (event->button() == Qt::LeftButton && mRectPixmap.contains(event->pos()))
 	{
+		setCursor(Qt::ClosedHandCursor);
 		misMousePress = true;
 		mMousePoint = event->pos();
 	}
@@ -111,6 +111,3 @@ void MyLabel::resizeEvent(QResizeEvent * event)
 	Reset();
 }
 
-void MyLabel::changeWheelValue(QPoint event, int value)
-{
-}
