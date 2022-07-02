@@ -188,8 +188,14 @@ void MyCamera::btnCaptureResponsed()
 
 void MyCamera::btnCutResponsed()
 {
-	if (mDisplayLabel->isCornerBtnsVisible()) mDisplayLabel->SetCornerBtnsVisible(false);
-	else mDisplayLabel->SetCornerBtnsVisible(true);
+	if (mDisplayLabel->isCornerBtnsVisible()) {
+		mDisplayLabel->SetCornerBtnsVisible(false);
+		ui.btnCut->setDown(false);
+	}
+	else {
+		mDisplayLabel->SetCornerBtnsVisible(true);
+		ui.btnCut->setDown(true);
+	}
 	mDisplayLabel->update();
 }
 
@@ -226,6 +232,7 @@ void MyCamera::btnPhotosResponsed()
 		mCamera->start();
 		mDisplayLabel->hide();
 		mCamViewFind->show();
+		mDisplayLabel->SetCornerBtnsVisible(false);
 
 	}
 	else {					//	当前为拍照模式，要切換到相冊模式
@@ -256,7 +263,7 @@ void MyCamera::btnPhotosResponsed()
 			QMessageBox::warning(this, QString::fromLocal8Bit("提示"), QString::fromLocal8Bit("当前路径无照片"));
 			return;
 		}
-		qDebug() << "MyCamera::btnPhotosResponsed():" << mDisplayLabel->size();
+		//qDebug() << "MyCamera::btnPhotosResponsed():" << mDisplayLabel->size();
 
 		RenderImage();	//渲染图片
 	}
@@ -265,9 +272,17 @@ void MyCamera::btnPhotosResponsed()
 void MyCamera::btnSaveImageResponsed()
 {
 	QString savepath = QFileDialog::getSaveFileName(this, "Save Capture", gDir + "/Untitled", "Image png(*.png);;Image jpg(*.jpg);;Image bmp(*.bmp);;Image jpeg(*.jpeg)");
-	const QPixmap *current_img = mDisplayLabel->pixmap();
-	if (!savepath.isEmpty()) {
-		current_img->save(savepath);
+	qDebug() << savepath << !savepath.isEmpty();
+	if (savepath.isEmpty()) return;
+
+	if (mDisplayLabel->isCornerBtnsVisible()) {
+		QPixmap cutImg;
+		cutImg = mDisplayLabel->GetCutImage();
+		cutImg.save(savepath);
+	}
+	else {
+		auto curImg = mDisplayLabel->pixmap();
+		if (curImg)curImg->save(savepath);
 	}
 	GetCurPathImagesList();
 	//mIntCurImageIdx = mIntCurImageIdx % mImageNamesList->size();

@@ -32,13 +32,17 @@ void MyLabel::Reset()
 {
 	if (this->pixmap() == nullptr) return;
 	*mScaledPixmap = this->pixmap()->scaled(this->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation); // 按比例缩放
-	//qDebug() << mScaledPixmap->size();
+	// 调整Image初次渲染位置
 	mScaleValue = 1.0;
 	double width = mScaledPixmap->width();
 	double height = mScaledPixmap->height();
 	mDrawPoint.setX((this->width() - width) / 2);
 	mDrawPoint.setY((this->height() - height) / 2);
+	
+	// 调整CutViewfinder初次渲染位置
 	SetCornerBtns((this->width() - width / 2) / 2, (this->height() - height / 2) / 2, (this->width() + width / 2) / 2, (this->height() + height / 2) / 2);
+	mRectCutViewfinder.setTopLeft(QPoint((this->width() - width / 2) / 2, (this->height() - height / 2) / 2));
+	mRectCutViewfinder.setSize(QSize(width / 2, height / 2));
 }
 
 void MyLabel::SetCornerBtnsVisible(bool b)
@@ -122,7 +126,7 @@ void MyLabel::resizeEvent(QResizeEvent * event)
 	Reset();
 }
 
-void MyLabel::DrawImage()
+inline void MyLabel::DrawImage()
 {
 	if (this->pixmap() == nullptr) return;
 	QPainter painter(this);
@@ -132,8 +136,8 @@ void MyLabel::DrawImage()
 	//mDrawPoint.setX((this->width() - width) / 2);
 	//mDrawPoint.setY((this->height() - height) / 2);
 	mRectPixmap = QRect(mDrawPoint.x(), mDrawPoint.y(), width, height);  // 图片区域
-																		 //qDebug() << this->pixmap()->size();
-	painter.drawPixmap(mRectPixmap, *mScaledPixmap);
+	 //qDebug() << this->pixmap()->size();
+	painter.drawPixmap(mRectPixmap, *this->pixmap());
 }
 
 inline void MyLabel::DrawCutViewfinder()
@@ -143,7 +147,9 @@ inline void MyLabel::DrawCutViewfinder()
 	int width = mTopRightBtn->x() - mTopLeftBtn->x();
 	int height = mBottomLeftBtn->y() - mTopLeftBtn->y();
 	int btnRadius = mTopLeftBtn->width() / 2;
-	painter.drawRect(mTopLeftBtn->x() + btnRadius, mTopLeftBtn->y() + btnRadius, width, height);
+	mRectCutViewfinder.setTopLeft(QPoint(mTopLeftBtn->x() + btnRadius, mTopLeftBtn->y() + btnRadius));
+	mRectCutViewfinder.setSize(QSize(width, height));
+	painter.drawRect(mRectCutViewfinder);
 }
 
 void MyLabel::ChangeCutViewfinderSize(int x, int y)
@@ -165,6 +171,17 @@ void MyLabel::ChangeCutViewfinderSize(int x, int y)
 		mBottomLeftBtn->move(mBottomLeftBtn->x(), y);
 	}
 	update();
+}
+
+QPixmap MyLabel::GetCutImage()
+{
+	QPixmap cutPixmap;
+	if (!mScaledPixmap->isNull() && mRectCutViewfinder.isValid())
+	{
+		// 注意 QPixmap::copy() 传入参数为pixmap的坐标系，所以需进行坐标变换
+		cutPixmap = mScaledPixmap->copy(mRectCutViewfinder);
+	}
+	return cutPixmap;
 }
 
 void MyLabel::SetCornerBtns(int x1, int y1, int x2, int y2)

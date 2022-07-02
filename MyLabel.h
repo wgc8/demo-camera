@@ -15,8 +15,9 @@ public:
 	void TurnImage(QMatrix& matrix, Qt::TransformationMode mode = Qt::SmoothTransformation);
 	void Reset();
 	void SetCornerBtnsVisible(bool);
-	bool isCornerBtnsVisible();
-	void ChangeCutViewfinderSize(int x, int y);
+	bool isCornerBtnsVisible();		// 用于判断是否处于裁剪模式
+	void ChangeCutViewfinderSize(int x, int y);	// 通过调节四个顶点PointButtoms来改变裁剪取景框尺寸与位置
+	QPixmap GetCutImage();
 
 protected:
 	virtual void paintEvent(QPaintEvent *) override;
@@ -35,9 +36,10 @@ private:
 	bool misMousePress;			// 鼠标是否按下
 	double mScaleValue;			// 图片缩放倍数
 	QPointF mDrawPoint;			// 绘图起点
-	QPointF mMousePoint;			// 鼠标当前位置点
+	QPointF mMousePoint;		// 鼠标当前位置点
 	QRect mRectPixmap;			// 被绘图片的矩形范围
-	QPen *mPen;
+	QRect mRectCutViewfinder;	// 裁剪框的矩形范围
+	QPen *mPen;					// 绘制矩形框的笔
 	QPixmap *mScaledPixmap;		// 调整后的图片Pixmap
 	PointButton *mTopLeftBtn;
 	PointButton *mTopRightBtn;
