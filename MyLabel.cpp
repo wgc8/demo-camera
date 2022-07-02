@@ -11,7 +11,6 @@ MyLabel::MyLabel(QWidget * parent)
 	, mTopRightBtn(new PointButton(this))
 	, mBottomLeftBtn(new PointButton(this))
 	, mBottomRightBtn(new PointButton(this))
-	, mScaledPixmap(new QPixmap())
 	, mPen(new QPen(Qt::red, 3, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin))
 {
 	SetCornerBtnsVisible(false);
@@ -31,11 +30,12 @@ void MyLabel::TurnImage(QMatrix & matrix, Qt::TransformationMode mode)
 void MyLabel::Reset()
 {
 	if (this->pixmap() == nullptr) return;
-	*mScaledPixmap = this->pixmap()->scaled(this->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation); // 按比例缩放
+	QPixmap scaledPixmap = this->pixmap()->scaled(this->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation); // 按比例缩放
 	// 调整Image初次渲染位置
-	mScaleValue = 1.0;
-	double width = mScaledPixmap->width();
-	double height = mScaledPixmap->height();
+	mScaleValue = double(scaledPixmap.width()) / this->pixmap()->width();
+	//mScaleValue = 1.0;
+	double width = scaledPixmap.width();
+	double height = scaledPixmap.height();
 	mDrawPoint.setX((this->width() - width) / 2);
 	mDrawPoint.setY((this->height() - height) / 2);
 	
@@ -130,13 +130,9 @@ inline void MyLabel::DrawImage()
 {
 	if (this->pixmap() == nullptr) return;
 	QPainter painter(this);
-	double width = mScaledPixmap->width() * mScaleValue;
-	double height = mScaledPixmap->height() * mScaleValue;
-	//mScaledPixmap = this->pixmap()->scaled(this->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation); // 按比例缩放
-	//mDrawPoint.setX((this->width() - width) / 2);
-	//mDrawPoint.setY((this->height() - height) / 2);
+	double width = this->pixmap()->width() * mScaleValue;
+	double height = this->pixmap()->height() * mScaleValue;
 	mRectPixmap = QRect(mDrawPoint.x(), mDrawPoint.y(), width, height);  // 图片区域
-	 //qDebug() << this->pixmap()->size();
 	painter.drawPixmap(mRectPixmap, *this->pixmap());
 }
 
@@ -176,10 +172,10 @@ void MyLabel::ChangeCutViewfinderSize(int x, int y)
 QPixmap MyLabel::GetCutImage()
 {
 	QPixmap cutPixmap;
-	if (!mScaledPixmap->isNull() && mRectCutViewfinder.isValid())
+	if (!this->pixmap()->isNull() && mRectCutViewfinder.isValid())
 	{
 		// 注意 QPixmap::copy() 传入参数为pixmap的坐标系，所以需进行坐标变换
-		cutPixmap = mScaledPixmap->copy(mRectCutViewfinder);
+		cutPixmap = this->pixmap()->copy(mRectCutViewfinder);
 	}
 	return cutPixmap;
 }

@@ -40,14 +40,13 @@ private:
 	QRect mRectPixmap;			// 被绘图片的矩形范围
 	QRect mRectCutViewfinder;	// 裁剪框的矩形范围
 	QPen *mPen;					// 绘制矩形框的笔
-	QPixmap *mScaledPixmap;		// 调整后的图片Pixmap
 	PointButton *mTopLeftBtn;
 	PointButton *mTopRightBtn;
 	PointButton *mBottomLeftBtn;
 	PointButton *mBottomRightBtn;// 裁剪框四个顶角按钮
 
 	const double ZOOM_VALUE = 1.1;		// 缩放系数
-	const double SCALE_MAX_VALUE = 5.0;//最大放大到原来的10倍
-	const double SCALE_MIN_VALUE = 0.5;//最小缩小到原来的0.5倍
+	const double SCALE_MAX_VALUE = 10.0;//最大放大到原来的10倍
+	const double SCALE_MIN_VALUE = 0.1;//最小缩小到原来的0.5倍
 
 };
