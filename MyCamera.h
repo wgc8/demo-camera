@@ -57,6 +57,6 @@ private slots:
 	void btnTurnRightResponsed();
 	void btnPreviousResponsed();
 	void btnNextResponsed();
-
+	void SwitchCamera(int cameraIdx);
 	void CountTime();
 };

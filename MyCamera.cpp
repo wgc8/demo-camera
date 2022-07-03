@@ -80,6 +80,7 @@ void MyCamera::InitConnections(){
 	connect(ui.btnSettings, &QPushButton::clicked, this, &MyCamera::btnSettingsResponsed);
 	connect(ui.btnTurnLeft, &QPushButton::clicked, this, &MyCamera::btnTurnLeftResponsed);
 	connect(ui.btnTurnRight, &QPushButton::clicked, this, &MyCamera::btnTurnRightResponsed);
+	connect(ui.cBoxCameras, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MyCamera::SwitchCamera);
 
 	connect(mTimer, &QTimer::timeout, this, &MyCamera::CountTime);
 }
@@ -331,6 +332,24 @@ void MyCamera::btnNextResponsed()
 
 	mIntCurImageIdx++;
 	RenderImage();
+}
+
+void MyCamera::SwitchCamera(int cameraIdx)
+{
+	mCamera->stop();
+	delete mCamera, mCamViewFind, mCamImgCap;
+	mCamera = new QCamera(mCamerasList[cameraIdx]);
+	mCamViewFind = new QCameraViewfinder();
+	mCamImgCap = new QCameraImageCapture(mCamera);
+
+	mCamImgCap->setCaptureDestination(QCameraImageCapture::CaptureToFile);
+	ui.DisplayLayout->addWidget(mCamViewFind);	//加入取景框
+	ui.DisplayLayout->addWidget(mDisplayLabel);	//加入照片渲染窗口
+
+	mCamera->setCaptureMode(QCamera::CaptureStillImage);
+
+	mCamera->setViewfinder(mCamViewFind);
+	mCamera->start();
 }
 
 void MyCamera::CountTime()

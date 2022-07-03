@@ -239,7 +239,9 @@ QPixmap MyLabel::GetCutImage()
 	if (!this->pixmap()->isNull() && mRectCutViewfinder.isValid())
 	{
 		// 注意 QPixmap::copy() 传入参数为pixmap的坐标系，所以需进行坐标变换
-		cutPixmap = this->pixmap()->copy(mRectCutViewfinder);
+		int x = (mRectCutViewfinder.x() - mRectPixmap.x()) / mScaleValue, y = (mRectCutViewfinder.y() - mRectPixmap.y()) / mScaleValue;
+		int width = mRectCutViewfinder.width() / mScaleValue, height = mRectCutViewfinder.height() / mScaleValue;
+		cutPixmap = this->pixmap()->copy(x, y, width, height);
 	}
 	return cutPixmap;
 }
