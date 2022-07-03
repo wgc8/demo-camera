@@ -194,6 +194,7 @@ void MyCamera::btnCutResponsed()
 	}
 	else {
 		mDisplayLabel->SetCornerBtnsVisible(true);
+		mDisplayLabel->Reset();
 		ui.btnCut->setDown(true);
 	}
 	mDisplayLabel->update();
@@ -272,7 +273,7 @@ void MyCamera::btnPhotosResponsed()
 void MyCamera::btnSaveImageResponsed()
 {
 	QString savepath = QFileDialog::getSaveFileName(this, "Save Capture", gDir + "/Untitled", "Image png(*.png);;Image jpg(*.jpg);;Image bmp(*.bmp);;Image jpeg(*.jpeg)");
-	qDebug() << savepath << !savepath.isEmpty();
+	//qDebug() << savepath << !savepath.isEmpty();
 	if (savepath.isEmpty()) return;
 
 	if (mDisplayLabel->isCornerBtnsVisible()) {

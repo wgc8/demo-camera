@@ -45,6 +45,7 @@ private:
 	PointButton *mBottomLeftBtn;
 	PointButton *mBottomRightBtn;// 裁剪框四个顶角按钮
 
+	const int	CutViewfinder_MAX_SIZE = 20;	// 裁剪框最小size
 	const double ZOOM_VALUE = 1.1;		// 缩放系数
 	const double SCALE_MAX_VALUE = 10.0;//最大放大到原来的10倍
 	const double SCALE_MIN_VALUE = 0.1;//最小缩小到原来的0.5倍

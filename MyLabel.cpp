@@ -40,7 +40,9 @@ void MyLabel::Reset()
 	mDrawPoint.setY((this->height() - height) / 2);
 	
 	// 调整CutViewfinder初次渲染位置
-	SetCornerBtns((this->width() - width / 2) / 2, (this->height() - height / 2) / 2, (this->width() + width / 2) / 2, (this->height() + height / 2) / 2);
+	int pointBtnRadius = mTopLeftBtn->width() / 2;
+	SetCornerBtns((this->width() - width / 2) / 2 - pointBtnRadius, (this->height() - height / 2) / 2 - pointBtnRadius, 
+		(this->width() + width / 2) / 2 - pointBtnRadius, (this->height() + height / 2) / 2 - pointBtnRadius);
 	mRectCutViewfinder.setTopLeft(QPoint((this->width() - width / 2) / 2, (this->height() - height / 2) / 2));
 	mRectCutViewfinder.setSize(QSize(width / 2, height / 2));
 }
@@ -140,29 +142,46 @@ inline void MyLabel::DrawCutViewfinder()
 {
 	QPainter painter(this);
 	painter.setPen(*mPen);
-	int width = mTopRightBtn->x() - mTopLeftBtn->x();
-	int height = mBottomLeftBtn->y() - mTopLeftBtn->y();
-	int btnRadius = mTopLeftBtn->width() / 2;
-	mRectCutViewfinder.setTopLeft(QPoint(mTopLeftBtn->x() + btnRadius, mTopLeftBtn->y() + btnRadius));
-	mRectCutViewfinder.setSize(QSize(width, height));
+	//int width = mTopRightBtn->x() - mTopLeftBtn->x();
+	//int height = mBottomLeftBtn->y() - mTopLeftBtn->y();
+	int pointBtnRadius = mTopLeftBtn->width() / 2;
+	int x1 = std::max(mTopLeftBtn->x() + pointBtnRadius, mRectPixmap.x()), y1 = std::max(mTopLeftBtn->y() + pointBtnRadius, mRectPixmap.y());
+	int x2 = std::min(mBottomRightBtn->x() + pointBtnRadius, mRectPixmap.right()), y2 = std::min(mBottomRightBtn->y() + pointBtnRadius, mRectPixmap.bottom());
+	mRectCutViewfinder.setTopLeft(QPoint(x1, y1));
+	mRectCutViewfinder.setBottomRight(QPoint(x2, y2));
+	SetCornerBtns(x1 - pointBtnRadius, y1 - pointBtnRadius, x2 - pointBtnRadius, y2 - pointBtnRadius);
+	//mTopLeftBtn->move(x1, y1), mTopRightBtn->move(x2, y1), mBottomLeftBtn->move(x1, y2), mBottomRightBtn->move(x2, y2);
 	painter.drawRect(mRectCutViewfinder);
 }
 
 void MyLabel::ChangeCutViewfinderSize(int x, int y)
 {
+	// 越界判断
+	int pointBtnRadius = mTopLeftBtn->width() / 2;
+	if (x < mRectPixmap.left() - pointBtnRadius) x = mRectPixmap.left() - pointBtnRadius;
+	else if (x > mRectPixmap.right() - pointBtnRadius) x = mRectPixmap.right() - pointBtnRadius;
+	if (y < mRectPixmap.top() - pointBtnRadius) y = mRectPixmap.top() - pointBtnRadius;
+	else if (y > mRectPixmap.bottom() - pointBtnRadius) y = mRectPixmap.bottom() - pointBtnRadius;
+	
+
+	// 维持矩形 && CutViewfinder最小尺寸约束
 	if (mTopLeftBtn->isPressed()) {
+		mTopLeftBtn->move(x, y);
 		mTopRightBtn->move(mBottomRightBtn->x(), y);
 		mBottomLeftBtn->move(x, mBottomRightBtn->y());
 	}
 	else if (mTopRightBtn->isPressed()) {
+		mTopRightBtn->move(x, y);
 		mTopLeftBtn->move(mBottomLeftBtn->x(), y);
 		mBottomRightBtn->move(x, mBottomLeftBtn->y());
 	}
 	else if (mBottomLeftBtn->isPressed()) {
+		mBottomLeftBtn->move(x, y);
 		mTopLeftBtn->move(x, mTopLeftBtn->y());
 		mBottomRightBtn->move(mBottomRightBtn->x(), y);
 	}
 	else if (mBottomRightBtn->isPressed()) {
+		mBottomRightBtn->move(x, y);
 		mTopRightBtn->move(x, mTopRightBtn->y());
 		mBottomLeftBtn->move(mBottomLeftBtn->x(), y);
 	}

@@ -39,7 +39,6 @@ void PointButton::mouseMoveEvent(QMouseEvent *event) {
 	QPushButton::mouseMoveEvent(event);
 	float dx = event->x() - mStartX;
 	float dy = event->y() - mStartY;
-	move(x() + dx, y() + dy);
 	MyLabel *parent = (MyLabel*) this->parent();
 	parent->ChangeCutViewfinderSize(x() + dx, y() + dy);
 }
