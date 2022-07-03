@@ -18,7 +18,7 @@ MyLabel::MyLabel(QWidget * parent)
 
 MyLabel::~MyLabel()
 {
-
+	delete mPen, mTopLeftBtn, mTopRightBtn, mBottomLeftBtn, mBottomRightBtn;
 }
 
 void MyLabel::TurnImage(QMatrix & matrix, Qt::TransformationMode mode)
@@ -73,9 +73,15 @@ void MyLabel::mouseMoveEvent(QMouseEvent * event)
 		int dx = event->pos().x() - mMousePoint.x();
 		int dy = event->pos().y() - mMousePoint.y();
 		mMousePoint = event->pos();
-		mDrawPoint.setX(mDrawPoint.x() + dx);
-		mDrawPoint.setY(mDrawPoint.y() + dy);
-
+		int X = mDrawPoint.x() + dx, Y = mDrawPoint.y() + dy;	// 新的Image绘制期起点
+		if (isCornerBtnsVisible()) {							// 裁剪模式下拖拽图片不超出裁剪框
+			if (X > mRectCutViewfinder.left()) X = mRectCutViewfinder.left();
+			else if (X + mRectPixmap.width() < mRectCutViewfinder.right()) X = mRectCutViewfinder.right() - mRectPixmap.width();
+			if (Y > mRectCutViewfinder.top()) Y = mRectCutViewfinder.top();
+			else if (Y + mRectPixmap.height() < mRectCutViewfinder.bottom()) Y = mRectCutViewfinder.bottom() - mRectPixmap.height();
+		}
+		mDrawPoint.setX(X);
+		mDrawPoint.setY(Y);
 		update();
 	}
 }
@@ -104,6 +110,7 @@ void MyLabel::mouseReleaseEvent(QMouseEvent * event)
 void MyLabel::wheelEvent(QWheelEvent * event)
 {
 	double oldScaleValue = mScaleValue;
+	double newScaleValue = 0.0;
 	if (event->delta() > 0) mScaleValue *= ZOOM_VALUE;
 	if (event->delta() < 0) mScaleValue /= ZOOM_VALUE;
 
@@ -114,11 +121,40 @@ void MyLabel::wheelEvent(QWheelEvent * event)
 		mScaleValue = SCALE_MIN_VALUE;
 	}
 
-	int X = event->pos().x(), Y = event->pos().y();
+	int X = event->x(), Y = event->y();
 	int x = mDrawPoint.x(), y = mDrawPoint.y();
 	double radio = mScaleValue / oldScaleValue;
-	mDrawPoint.setX(x - (X - x) * (radio - 1));
-	mDrawPoint.setY(y - (Y - y) * (radio - 1));
+	int newX1 = x - (X - x) * (radio - 1), newY1 = y - (Y - y) * (radio - 1);
+	int newX2 = newX1 + mScaleValue * this->pixmap()->width(), newY2 = newY1 + mScaleValue * this->pixmap()->height();
+
+	if(isCornerBtnsVisible()) {							// 裁剪模式下缩放图片不超出裁剪框,分别对4个边进行判断
+		if (newX1 > mRectCutViewfinder.left()) {
+			mScaleValue = oldScaleValue * (X - mRectCutViewfinder.left()) / (X - x);
+			radio = mScaleValue / oldScaleValue;
+			newX1 = x - (X - x) * (radio - 1), newY1 = y - (Y - y) * (radio - 1);
+			newX2 = newX1 + mScaleValue * this->pixmap()->width(), newY2 = newY1 + mScaleValue * this->pixmap()->height();
+		}
+		if (newX2 < mRectCutViewfinder.right()) {
+			mScaleValue = oldScaleValue * (X - mRectCutViewfinder.right()) / (X - mRectPixmap.right());
+			radio = mScaleValue / oldScaleValue;
+			newX1 = x - (X - x) * (radio - 1), newY1 = y - (Y - y) * (radio - 1);
+			newX2 = newX1 + mScaleValue * this->pixmap()->width(), newY2 = newY1 + mScaleValue * this->pixmap()->height();
+		}
+		if (newY1 > mRectCutViewfinder.top()) {
+			mScaleValue = oldScaleValue * (Y - mRectCutViewfinder.top()) / (Y - y);
+			radio = mScaleValue / oldScaleValue;
+			newX1 = x - (X - x) * (radio - 1), newY1 = y - (Y - y) * (radio - 1);
+			newX2 = newX1 + mScaleValue * this->pixmap()->width(), newY2 = newY1 + mScaleValue * this->pixmap()->height();
+		}
+		if (newY2 < mRectCutViewfinder.bottom()) {
+			mScaleValue = oldScaleValue * (Y - mRectCutViewfinder.bottom()) / (Y - mRectPixmap.bottom());
+			radio = mScaleValue / oldScaleValue;
+			newX1 = x - (X - x) * (radio - 1), newY1 = y - (Y - y) * (radio - 1);
+			newX2 = newX1 + mScaleValue * this->pixmap()->width(), newY2 = newY1 + mScaleValue * this->pixmap()->height();
+		}
+	}
+	mDrawPoint.setX(newX1);
+	mDrawPoint.setY(newY1);
 
 	update();
 }
@@ -142,15 +178,16 @@ inline void MyLabel::DrawCutViewfinder()
 {
 	QPainter painter(this);
 	painter.setPen(*mPen);
-	//int width = mTopRightBtn->x() - mTopLeftBtn->x();
-	//int height = mBottomLeftBtn->y() - mTopLeftBtn->y();
 	int pointBtnRadius = mTopLeftBtn->width() / 2;
+	/*
 	int x1 = std::max(mTopLeftBtn->x() + pointBtnRadius, mRectPixmap.x()), y1 = std::max(mTopLeftBtn->y() + pointBtnRadius, mRectPixmap.y());
 	int x2 = std::min(mBottomRightBtn->x() + pointBtnRadius, mRectPixmap.right()), y2 = std::min(mBottomRightBtn->y() + pointBtnRadius, mRectPixmap.bottom());
 	mRectCutViewfinder.setTopLeft(QPoint(x1, y1));
 	mRectCutViewfinder.setBottomRight(QPoint(x2, y2));
 	SetCornerBtns(x1 - pointBtnRadius, y1 - pointBtnRadius, x2 - pointBtnRadius, y2 - pointBtnRadius);
-	//mTopLeftBtn->move(x1, y1), mTopRightBtn->move(x2, y1), mBottomLeftBtn->move(x1, y2), mBottomRightBtn->move(x2, y2);
+	*/
+	mRectCutViewfinder.setTopLeft(QPoint(mTopLeftBtn->x() + pointBtnRadius, mTopLeftBtn->y() + pointBtnRadius));
+	mRectCutViewfinder.setBottomRight(QPoint(mBottomRightBtn->x() + pointBtnRadius, mBottomRightBtn->y() + pointBtnRadius));
 	painter.drawRect(mRectCutViewfinder);
 }
 
@@ -166,21 +203,29 @@ void MyLabel::ChangeCutViewfinderSize(int x, int y)
 
 	// 维持矩形 && CutViewfinder最小尺寸约束
 	if (mTopLeftBtn->isPressed()) {
+		if (x > mBottomRightBtn->x() - CutViewfinder_MAX_SIZE) x = mBottomRightBtn->x() - CutViewfinder_MAX_SIZE;
+		if (y > mBottomRightBtn->y() - CutViewfinder_MAX_SIZE) y = mBottomRightBtn->y() - CutViewfinder_MAX_SIZE;
 		mTopLeftBtn->move(x, y);
 		mTopRightBtn->move(mBottomRightBtn->x(), y);
 		mBottomLeftBtn->move(x, mBottomRightBtn->y());
 	}
 	else if (mTopRightBtn->isPressed()) {
+		if (x < mBottomLeftBtn->x() + CutViewfinder_MAX_SIZE) x = mBottomLeftBtn->x() + CutViewfinder_MAX_SIZE;
+		if (y > mBottomLeftBtn->y() - CutViewfinder_MAX_SIZE) y = mBottomLeftBtn->y() - CutViewfinder_MAX_SIZE;
 		mTopRightBtn->move(x, y);
 		mTopLeftBtn->move(mBottomLeftBtn->x(), y);
 		mBottomRightBtn->move(x, mBottomLeftBtn->y());
 	}
 	else if (mBottomLeftBtn->isPressed()) {
+		if (x > mTopRightBtn->x() - CutViewfinder_MAX_SIZE) x = mTopRightBtn->x() - CutViewfinder_MAX_SIZE;
+		if (y < mTopRightBtn->y() + CutViewfinder_MAX_SIZE) y = mTopRightBtn->y() + CutViewfinder_MAX_SIZE;
 		mBottomLeftBtn->move(x, y);
 		mTopLeftBtn->move(x, mTopLeftBtn->y());
 		mBottomRightBtn->move(mBottomRightBtn->x(), y);
 	}
 	else if (mBottomRightBtn->isPressed()) {
+		if (x < mTopLeftBtn->x() + CutViewfinder_MAX_SIZE) x = mTopLeftBtn->x() + CutViewfinder_MAX_SIZE;
+		if (y < mTopLeftBtn->y() + CutViewfinder_MAX_SIZE) y = mTopLeftBtn->y() + CutViewfinder_MAX_SIZE;
 		mBottomRightBtn->move(x, y);
 		mTopRightBtn->move(x, mTopRightBtn->y());
 		mBottomLeftBtn->move(mBottomLeftBtn->x(), y);
