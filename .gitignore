@@ -60,3 +60,4 @@ deploy/
 
 #SQL Server Compact Edition Database File
 *.sdf
+*.db
